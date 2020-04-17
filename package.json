@@ -1,0 +1,14 @@
+{
+  "name": "flightusa",
+  "version": "1.0.0",
+  "description": "VIZ",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Maksym Kriventsev",
+  "license": "ISC",
+  "dependencies": {
+    "graphml-js": "^0.4.0"
+  }
+}

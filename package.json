@@ -2,13 +2,20 @@
   "name": "flightusa",
   "version": "1.0.0",
   "description": "VIZ",
-  "main": "index.js",
+  "private": true,
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "webpack",
+    "start": "webpack-dev-server"
   },
   "author": "Maksym Kriventsev",
   "license": "ISC",
   "dependencies": {
     "graphml-js": "^0.4.0"
+  },
+  "devDependencies": {
+    "webpack": "^4.42.1",
+    "webpack-cli": "^3.3.11",
+    "webpack-dev-server": "^3.10.3"
   }
 }

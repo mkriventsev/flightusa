@@ -25,13 +25,13 @@ function clickOnCanvas(e) {
 
         if (selectedNode) {
             console.log(selectedNode)
-            debugg(selectedNode)    
+            debugg(selectedNode)
             draw(selectedNode._id)
         } else {
             draw()
 
         }
-      
+
         console.log(pos)
     }
     console.log("++++++++++++++++++")
@@ -110,29 +110,48 @@ function drawNodes(nodes, m) { // m - object with Map's bounds
 
 function drawInitDataFlights(edges, nodes, n) { // e - Edge's ID, n - node's ID
 
+    const connectedEdge = n && edges.filter(edge => edge._source === n || edge._target === n)
+    console.log('connected' + connectedEdge)
     edges.forEach(item => {
-        // console.log("from", item._source, " to", item._target)
-        // console.log(nodes[item._source], " to", nodes[item._target])
-        ctx.beginPath();
-        ctx.moveTo(nodes[item._source].xScreen, nodes[item._source].yScreen);
-        ctx.lineTo(nodes[item._target].xScreen, nodes[item._target].yScreen);
-        ctx.strokeStyle = 'rgba(165, 165, 165, 0.2)';
-        ctx.stroke();
+        if (item._source !== n || item._target !== n) {
+            drawEdges(nodes, item, false)
+        }
     })
-
-
+    connectedEdge && drawEdges(nodes, connectedEdge, true)
 
     const selectedNode = n && nodes.find(node => node._id === n)
 
     nodes.forEach(item => {
-       if (item._id !== n) {
-        drawNode(item, false)
-       }
+        if (item._id !== n) {
+            drawNode(item, false)
+        }
     })
     selectedNode && drawNode(selectedNode, true)
 
 
     //TODO if empty also reset
+}
+
+function drawEdges(nodes, edges, isSelected) {
+    const strokeStyle = isSelected ? 'rgba(255, 0, 0, 0.5)' : 'rgba(165, 165, 165, 0.2)'
+    if (isSelected) {
+        console.log('selected' + edges)
+        edges.forEach(edge => {
+            console.log('selected ' + edge)
+            ctx.beginPath();
+            ctx.moveTo(nodes[edge._source].xScreen, nodes[edge._source].yScreen);
+            ctx.lineTo(nodes[edge._target].xScreen, nodes[edge._target].yScreen);
+            ctx.strokeStyle = strokeStyle;
+            ctx.stroke();
+        })
+    } else {
+    ctx.beginPath();
+    console.log(nodes[edges._source])
+    ctx.moveTo(nodes[edges._source].xScreen, nodes[edges._source].yScreen);
+    ctx.lineTo(nodes[edges._target].xScreen, nodes[edges._target].yScreen);
+    ctx.strokeStyle = strokeStyle;
+    ctx.stroke();
+}
 }
 
 function drawNode(node, isSelected) {

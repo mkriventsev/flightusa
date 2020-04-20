@@ -6,14 +6,17 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "build": "webpack",
-    "start": "webpack-dev-server"
+    "start": "webpack-dev-server --open"
   },
   "author": "Maksym Kriventsev",
   "license": "ISC",
   "dependencies": {
-    "graphml-js": "^0.4.0"
+    "graphml-js": "^0.4.0",
+    "lodash": "^4.17.15"
   },
   "devDependencies": {
+    "css-loader": "^3.5.2",
+    "style-loader": "^1.1.4",
     "webpack": "^4.42.1",
     "webpack-cli": "^3.3.11",
     "webpack-dev-server": "^3.10.3"

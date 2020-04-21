@@ -117,7 +117,7 @@ function drawInitDataFlights(edges, nodes, n) { // e - Edge's ID, n - node's ID
             drawEdges(nodes, item, false)
         }
     })
-    connectedEdge && drawEdges(nodes, connectedEdge, true)
+    connectedEdge && drawEdges(nodes, connectedEdge, true, n)
 
     const selectedNode = n && nodes.find(node => node._id === n)
 
@@ -132,26 +132,90 @@ function drawInitDataFlights(edges, nodes, n) { // e - Edge's ID, n - node's ID
     //TODO if empty also reset
 }
 
-function drawEdges(nodes, edges, isSelected) {
+
+function drawEdges(nodes, edges, isSelected, n) {
     const strokeStyle = isSelected ? 'rgba(255, 0, 0, 0.5)' : 'rgba(165, 165, 165, 0.2)'
+    ctx.beginPath();
+    let direction;
     if (isSelected) {
         console.log('selected' + edges)
         edges.forEach(edge => {
-            console.log('selected ' + edge)
-            ctx.beginPath();
+            console.log(edge)
+            if (edge._source == n){
+                console.log('FROM')
+                direction = true
+            }
+            if (edge._target == n){
+                console.log('TO')
+                direction = false
+            }
+            const xb_ = nodes[edge._source].xScreen
+            const yb_ = nodes[edge._source].yScreen
+            const xa_ = (nodes[edge._source].xScreen + nodes[edge._target].xScreen) / 2
+            const ya_ = (nodes[edge._source].yScreen + nodes[edge._target].yScreen) / 2
+            const x2x1 = xa_ - xb_;
+            const y2y1 = ya_ - yb_;
+
+            const ab = Math.sqrt(x2x1 ** 2 + y2y1 ** 2);
+        
+            const v1x = (xb_ -  xa_) / ab;
+            const v1y = (yb_ -  ya_) / ab;
+
+            const v3x = (v1y > 0 ? - v1y : v1y) * (Math.sqrt(3)/3)*ab;
+            const v3y = (v1x > 0 ? v1x : - v1x) * (Math.sqrt(3)/3)*ab;
+
+            let xc_ = xa_ - v3x;
+            let yc_ = ya_ - v3y;
+
+            if (nodes[edge._source].xScreen > nodes[edge._target].xScreen){
+                xc_ = xa_ - v3x;
+                yc_ = ya_ - v3y;
+                
+            }
+            else{
+                xc_ = xa_ + v3x;
+                yc_ = ya_ + v3y;
+            }
+            
             ctx.moveTo(nodes[edge._source].xScreen, nodes[edge._source].yScreen);
-            ctx.lineTo(nodes[edge._target].xScreen, nodes[edge._target].yScreen);
-            ctx.strokeStyle = strokeStyle;
-            ctx.stroke();
+            ctx.quadraticCurveTo(xc_, yc_, nodes[edge._target].xScreen, nodes[edge._target].yScreen);
+            // ctx.lineTo(nodes[edge._target].xScreen, nodes[edge._target].yScreen);
+            
         })
     } else {
-    ctx.beginPath();
-    console.log(nodes[edges._source])
-    ctx.moveTo(nodes[edges._source].xScreen, nodes[edges._source].yScreen);
-    ctx.lineTo(nodes[edges._target].xScreen, nodes[edges._target].yScreen);
+        const xb_ = nodes[edges._source].xScreen
+        const yb_ = nodes[edges._source].yScreen
+        const xa_ = (nodes[edges._source].xScreen + nodes[edges._target].xScreen) / 2
+        const ya_ = (nodes[edges._source].yScreen + nodes[edges._target].yScreen) / 2
+        const x2x1 = xa_ - xb_;
+        const y2y1 = ya_ - yb_;
+
+        const ab = Math.sqrt(x2x1 * x2x1 + y2y1 * y2y1);
+
+        const v1x = (xb_ -  xa_) / ab;
+        const v1y = (yb_ -  ya_) / ab;
+
+        const v3x = (v1y > 0 ? - v1y : v1y) * (Math.sqrt(3)/6)*ab;
+        const v3y = (v1x > 0 ? v1x : - v1x) * (Math.sqrt(3)/6)*ab;
+
+        let xc_ = xa_ - v3x;
+        let yc_ = ya_ - v3y;
+
+        if (nodes[edges._source].xScreen > nodes[edges._target].xScreen){
+            xc_ = xa_ - v3x;
+            yc_ = ya_ - v3y;
+        }
+        else{
+            xc_ = xa_ + v3x;
+            yc_ = ya_ + v3y;
+        }
+        
+        ctx.moveTo(nodes[edges._source].xScreen, nodes[edges._source].yScreen);
+        ctx.quadraticCurveTo(xc_, yc_, nodes[edges._target].xScreen, nodes[edges._target].yScreen);
+        // ctx.lineTo(nodes[edges._target].xScreen, nodes[edges._target].yScreen);
+    }
     ctx.strokeStyle = strokeStyle;
     ctx.stroke();
-}
 }
 
 function drawNode(node, isSelected) {

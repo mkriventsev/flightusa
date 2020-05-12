@@ -1,6 +1,8 @@
-export const NODE_RADIUS = 7;
-export const SHIFT = 15
+export const NODE_RADIUS = 5;
+export const SHIFT = 100
 // export const ALFA = 0.2
-export const CANVAS_WIDTH =  window.innerWidth * 0.9
-export const CANVAS_HEIGHT = window.innerHeight * 0.9
+export const CANVAS_WIDTH = 1000
+// window.innerWidth //* 0.99 
+export const CANVAS_HEIGHT = 589 
+//window.innerHeight //* 0.99
  

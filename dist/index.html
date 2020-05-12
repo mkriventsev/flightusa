@@ -11,19 +11,136 @@
 </head>
 
 <body>
-    <div>
-        <canvas id="canvas" >
-            current stock price: $3.15 + 0.15
-        </canvas>
-        <div id="logs">
-            <div id="debugg">
+        <nav class="sticky-top navbar navbar-dark bg-dark w-100">
+            <div class="container">
+            <h4 class="text-white">
+                Visualization of airline travel in the USA
+                <small class="text-info">Kriventsev Maksym, Janousek Ondrej</small>
+            </h4>
+        </div>
+        </nav>
+        <div id="main">
+            <div id='canvasContainer'>
+            <canvas id="canvas">
+                current stock price: $3.15 + 0.15
+            </canvas>
+            <div id="logs">
+                <div id="debugg">
+                </div>
+                <table id="nodessss">
+                </table>
             </div>
-            <table id="nodes">
-            </table>
+        </div>
+        <div class="fixed-bottom bg-dark">
+            text <br>text
         </div>
     </div>
-
+    
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css"
+        integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous">
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js"
+        integrity="sha384-ChfqqxuZUCnJSK3+MXmPNIyE6ZbWh2IMqE241rYiqJxyMiZ6OW/JmZQ5stwEULTy"
+        crossorigin="anonymous"></script>
     <script type="text/javascript" src="main.js"></script>
+    <script type="text/paperscript" src="js/myScript.js" canvas="canvas"></script>
+    <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>
+    <script src="https://d3js.org/d3.v3.min.js" charset="utf-8"></script>
+    <script type="text/javascript" src="d3-ForceEdgeBundling.js"></script>
+    <!-- <script>
+        $(function () {
+            d3.xml("airlines.xml", function (xml) {
+                //Transform the XML data into a proper format used by the algorithm
+                var raw_edges = xml.documentElement.getElementsByTagName("edge");
+                var raw_nodes = xml.documentElement.getElementsByTagName("node");
+                var eedges = [];
+                var nnodes = {};
+
+                var min_x = Number.MAX_VALUE;
+                console.log('min x' + min_x)
+                var max_x = 0;
+                var min_y = Number.MAX_VALUE;
+                var max_y = 0;
+
+                for (var i = 0; i < raw_nodes.length; i++) {
+                    var key = raw_nodes[i].getAttribute('id');
+                    var x = Math.abs(parseFloat(raw_nodes[i].childNodes[1].firstChild.nodeValue));
+                    var name = raw_nodes[i].childNodes[3].firstChild.nodeValue;
+                    var y = Math.abs(parseFloat(raw_nodes[i].childNodes[5].firstChild.nodeValue));
+
+                    nnodes[key] = { 'x': x, 'y': y };
+                    min_x = Math.min(min_x, x);
+                    max_x = Math.max(max_x, x);
+                    min_y = Math.min(min_y, y);
+                    max_y = Math.max(max_y, y);
+                }
+
+
+
+                for (var i = 0; i < raw_edges.length; i++) {
+                    eedges.push({
+                        'source': raw_edges[i].getAttribute('source'),
+                        'target': raw_edges[i].getAttribute('target')
+                    });
+                }
+
+                // console.log((nnodes))
+                // console.log((eedges))
+
+                var new_scale_x = d3.scale.linear().domain([min_x, max_x]).range([900, 50]);
+                var new_scale_y = d3.scale.linear().domain([min_y, max_y]).range([460, 50]);
+                for (var i = 0; i < raw_nodes.length; i++) {
+                    //   console.log(`${i} old ${nnodes[i].x} : ${nnodes[i].y}`)
+                    //   console.log(`new ${new_scale_x(nnodes[i].x)} : ${new_scale_y(nnodes[i].y)}`)
+                    nnodes[i].x = new_scale_x(nnodes[i].x);
+                    nnodes[i].y = new_scale_y(nnodes[i].y);
+                }
+
+                // Run the FDEB algorithm using default values on the data
+                debugger
+                var fbundling = ForceEdgeBundling().nodes(nnodes).edges(eedges);
+                debugger
+                var results = fbundling();
+                console.log('test' + results + ' kength' + results.length)
+                results.forEach(element => {
+                    console.log(element)
+                });
+
+                var svg = d3.select("#svg").append("svg")
+                    .attr("width", 1000)
+                    .attr("height", 600);
+
+                svg = svg.append('g');
+                      svg.append('rect').attr({'fill': '#111155', 'width': 1000, 'height':600});
+                      svg.attr('transform', 'translate(20, 20)');
+
+
+                var d3line = d3.svg.line()
+                                .x(function(d){return d.x;})
+                                .y(function(d){return d.y;})
+                                .interpolate("linear");
+                //plot the data
+                for(var i = 0; i < results.length; i++){
+                    svg.append("path").attr("d", d3line(results[i]))
+                        .style("stroke-width", 0.5)
+                        .style("stroke", "#ff2222")
+                        .style("fill", "none")
+                        .style('stroke-opacity',0.15);
+                }
+
+                //draw nodes
+                svg.selectAll('.node')
+                   .data(d3.entries(nnodes))
+                   .enter()
+                   .append('circle')
+                   .classed('node', true)
+                   .attr({'r': 2, 'fill':'#ffee00'})
+                   .attr('cx', function(d){ return d.value.x;})
+                   .attr('cy', function(d){ return d.value.y;});
+
+
+            });
+        })
+    </script> -->
 </body>
 
 </html>

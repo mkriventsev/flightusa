@@ -39,8 +39,8 @@ function parseUSAmap(usaMap) {
         if (feature.geometry.type == 'Polygon') {
             let Polygon = feature.geometry.coordinates.map(coordinate =>
                 coordinate.map(item => ({
-                    x: (item[0] * 10.0 + 1345)*1.5,
-                    y: (item[1] * (-13.5) + 680)*1.5
+                    x: (item[0] * 10.0 + 1345) * 1.5,
+                    y: (item[1] * (-13.5) + 680) * 1.5
                 })))
             states.push(Polygon)
         }
@@ -48,8 +48,8 @@ function parseUSAmap(usaMap) {
             let MultiPolygon =
                 feature.geometry.coordinates.map(coordinate =>
                     coordinate[0].map(item => ({
-                        x: (item[0] * 10.0 + 1345)*1.5,
-                        y: (item[1] * (-13.5) + 680)*1.5
+                        x: (item[0] * 10.0 + 1345) * 1.5,
+                        y: (item[1] * (-13.5) + 680) * 1.5
                     })))
             states.push(MultiPolygon)
 
@@ -135,7 +135,7 @@ function FDEB(data) {
     edgeSubDivisions(P);
 
     updateEdgeCompatibilities();
-    console.log(edgeCompatibilities)
+    // console.log(edgeCompatibilities)
 
 
     for (let cycle = 0; cycle < C; cycle++) {
@@ -155,11 +155,10 @@ function FDEB(data) {
         S *= S_decrease;
         P *= P_increase;
         I *= I_decrease;
-        drawLineFDEB(edgeSubdivision)
+
         edgeSubDivisions(P)
 
     }
-    console.log(edgeSubdivision)
 
     return edgeSubdivision;
 
@@ -433,7 +432,7 @@ function clickOnCanvas(e) {
 
 
 function isIntersect(point, node) {
-    return Math.sqrt((point.x - node.x) ** 2 + (point.y - node.y) ** 2) < Math.log(node.weight)*NODE_RADIUS/2;
+    return Math.sqrt((point.x - node.x) ** 2 + (point.y - node.y) ** 2) < Math.log(node.weight) * NODE_RADIUS / 2;
 }
 
 function draw(n) {
@@ -442,21 +441,19 @@ function draw(n) {
         const mapScreenParams = mapParams(data.nodes);
         const mapNodes = drawNodes(data.nodes, mapScreenParams)
         // ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
-        console.log(states)
+        // console.log('States: ' + states)
 
         drawUSAmap(states)
-        
+
 
         // console.log(mapNodes)
-         let results = FDEB(data);
-        // console.log(results)
-        drawInitDataFlights(data.edges, mapNodes, n); 
+        let results = FDEB(data);
+        drawInitDataFlights(data.edges, mapNodes, n);
+        console.log(results)
         drawLineFDEB(results)
-         
+
         //началос
         console.log("ATTT")
-
-
 
 
     }
@@ -464,11 +461,12 @@ function draw(n) {
 function drawLineFDEB(newEdges) {
     newEdges.forEach(edge => {
         ctx.beginPath();
-        ctx.moveTo(edge.x, edge.y)
-        // console.log(edge.x, edge.y)
+        ctx.moveTo(edge[0].x, edge[0].y)
+        // console.log(edge[0].x, edge[0].y)
         for (let point = 1; point < edge.length; point++) {
-            if ((edge[point], edge[point-1]) > 1)
-            ctx.lineTo(edge[point].x, edge[point].y);
+            if (distance(edge[point], edge[point - 1]) > 1) {
+                ctx.lineTo(edge[point].x, edge[point].y);
+            }
         }
         ctx.strokeStyle = 'rgba(23,123,143,0.1)';
         ctx.stroke();
@@ -509,7 +507,7 @@ function mapParams(nodes) {
     var mapHeight = yMax - yMin;
     var mapWidth = xMax - xMin;
     const ratio = mapWidth / mapHeight
-    console.log(ratio)
+    console.log('ratio ' + ratio)
     return {
         xMax: xMax,
         yMax: yMax,
@@ -526,8 +524,8 @@ function drawNodes(nodes, m) { // m - object with Map's bounds
     nodes.forEach(item => {
         item.xOrig = item.x
         item.yOrig = item.y
-        item.x = (SHIFT+2 + (- m.xMin + item.x))*1.5 // / m.mapWidth * ctx.canvas.width
-        item.y = (SHIFT/5 + (- m.yMin + item.y) * 1.35)*1.5 // / m.mapHeight * ctx.canvas.width  / m.ratio
+        item.x = (SHIFT + 2 + (- m.xMin + item.x)) * 1.5 // / m.mapWidth * ctx.canvas.width
+        item.y = (SHIFT / 5 + (- m.yMin + item.y) * 1.35) * 1.5 // / m.mapHeight * ctx.canvas.width  / m.ratio
         // item.title = item.title =
     }
     )
@@ -644,7 +642,7 @@ function drawEdges(nodes, edges, isSelected, n) {
 }
 
 function drawNode(node, isSelected, n) {
-    const radius = isSelected ? Math.log(node.weight)*NODE_RADIUS/2 * 1.5 : Math.log(node.weight)*NODE_RADIUS/2
+    const radius = isSelected ? Math.log(node.weight) * NODE_RADIUS / 2 * 1.5 : Math.log(node.weight) * NODE_RADIUS / 2
     const nodefillStyle = isSelected ? 'rgba(23, 165, 24, 1)' : 'rgba(255, 165, 0, 0.8)'
     const strokeStyle = isSelected ? 'rgba(54, 150, 54, 1)' : 'rgba(255, 150, 50,1)'
     ctx.beginPath();
@@ -662,11 +660,11 @@ function drawNode(node, isSelected, n) {
 // points: are and array of arrays consisting of [[x,y],[x,y],...,[x,y]]
 // length: is in pixels and is the square of the actual distance.
 // returns array of points of the same form as the input argument points.
-var simplifyLineRDP = function(points, length) {
-    var simplify = function(start, end) { // recursive simplifies points from start to end
-        var maxDist, index, i, xx , yy, dx, dy, ddx, ddy, p1, p2, p, t, dist, dist1;
+var simplifyLineRDP = function (points, length) {
+    var simplify = function (start, end) { // recursive simplifies points from start to end
+        var maxDist, index, i, xx, yy, dx, dy, ddx, ddy, p1, p2, p, t, dist, dist1;
         p1 = points[start];
-        p2 = points[end];   
+        p2 = points[end];
         xx = p1[0];
         yy = p1[1];
         ddx = p2[0] - xx;
@@ -676,24 +674,24 @@ var simplifyLineRDP = function(points, length) {
         for (var i = start + 1; i < end; i++) {
             p = points[i];
             if (ddx !== 0 || ddy !== 0) {
-               // dot product
+                // dot product
                 t = ((p[0] - xx) * ddx + (p[1] - yy) * ddy) / dist1;
                 if (t > 1) {
                     dx = p[0] - p2[0];
                     dy = p[1] - p2[1];
-                } else 
-                if (t > 0) {
-                    dx = p[0] - (xx + ddx * t);
-                    dy = p[1] - (yy + ddy * t);
-                } else {
-                    dx = p[0] - xx;
-                    dy = p[1] - yy;
-                }
-            }else{
+                } else
+                    if (t > 0) {
+                        dx = p[0] - (xx + ddx * t);
+                        dy = p[1] - (yy + ddy * t);
+                    } else {
+                        dx = p[0] - xx;
+                        dy = p[1] - yy;
+                    }
+            } else {
                 dx = p[0] - xx;
                 dy = p[1] - yy;
             }
-            dist = dx * dx + dy * dy 
+            dist = dx * dx + dy * dy
             if (dist > maxDist) {
                 index = i;
                 maxDist = dist;
@@ -701,15 +699,15 @@ var simplifyLineRDP = function(points, length) {
         }
 
         if (maxDist > length) { // continue simplification while maxDist > length
-            if (index - start > 1){
+            if (index - start > 1) {
                 simplify(start, index);
             }
             newLine.push(points[index]);
-            if (end - index > 1){
+            if (end - index > 1) {
                 simplify(index, end);
             }
         }
-    }    
+    }
     var end = points.length - 1;
     var newLine = [points[0]];
     simplify(0, end);

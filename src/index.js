@@ -13,7 +13,13 @@ ctx.canvas.height = CANVAS_HEIGHT
 ctx.globalAlpha = ALFA
 
 const data = reparseData(dataStart)
+let isInit = false;
+let mapScreenParams // = mapParams(data.nodes);
+let mapNodes// = changeNodesParams(data.nodes, mapScreenParams)
+
 const states = parseUSAmap(usaMap)
+
+let FDEBEdges;
 
 function drawUSAmap(states) {
     states.forEach(state => {
@@ -55,10 +61,8 @@ function parseUSAmap(usaMap) {
 
         }
 
-    }
-    );
+    });
     return states
-
 }
 
 function reparseData(dataStart) {
@@ -88,7 +92,6 @@ function reparseData(dataStart) {
         edges,
     };
 }
-console.log(data)
 
 // P0 //an initial number of subdivision points P0 for each edge
 // S0 //and an initial step size S0. 
@@ -412,14 +415,15 @@ function clickOnCanvas(e) {
         x: e.clientX,
         y: e.clientY - 52
     }
-    if (data.nodes[0].x && data.nodes[0].y) {
-        console.log('test')
+    // if clicked before map is calculated -> ignore click event
+    if (data.nodes.length > 0) {
+        console.log('click event go: ')
         const selectedNode = data.nodes.find(node => isIntersect(pos, node));
         ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
 
         if (selectedNode) {
-            console.log(selectedNode)
-            debugg(selectedNode)
+            console.log('node is selected - x ' + selectedNode.x + ' y ' + selectedNode.y)
+            debugToPage(selectedNode)
             draw(selectedNode.id)
         } else {
             draw()
@@ -435,55 +439,110 @@ function isIntersect(point, node) {
     return Math.sqrt((point.x - node.x) ** 2 + (point.y - node.y) ** 2) < Math.log(node.weight) * NODE_RADIUS / 2;
 }
 
+
+function drawInit() {
+    console.log('draw Init starts here')
+    displayJsonDebugOnPage(data);
+    mapScreenParams = mapParams(data.nodes);
+    mapNodes = changeNodesParams(data.nodes, mapScreenParams)
+    drawUSAmap(states)
+    // drawInitDataFlights(data.edges, mapNodes);
+    drawInitNodes(mapNodes);
+    drawInitEdges(data.edges, mapNodes);
+    isInit = true
+    console.log('draw Init ends here')
+    FDEBEdges = FDEB(data);
+}
+
 function draw(n) {
     if (canvas.getContext) {
-        displayJson(data);
-        const mapScreenParams = mapParams(data.nodes);
-        const mapNodes = drawNodes(data.nodes, mapScreenParams)
-        // ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
-        // console.log('States: ' + states)
-
+        displayJsonDebugOnPage(data);
         drawUSAmap(states)
+        // FDEBNodes = FDEB(data);
+        
+        drawInitNodes(mapNodes);
+        // drawInitDataFlights(data.edges, mapNodes, n);
 
-
-        // console.log(mapNodes)
-        let results = FDEB(data);
-        drawInitDataFlights(data.edges, mapNodes, n);
-        console.log(results)
-        drawLineFDEB(results)
+        drawLineFDEB(data.nodes, data.edges, FDEBEdges,n)
 
         //началос
         console.log("ATTT")
-
-
     }
 }
-function drawLineFDEB(newEdges) {
-    newEdges.forEach(edge => {
+
+function drawLineFDEB(nodes, edges, newEdges, n) {
+    // debugger
+    const connectedEdges = n && edges.filter(edge => edge.source === n || edge.target === n)
+    // 0: {id: "86", source: "15", target: "200"}
+    // 1: {id: "88", source: "17", target: "200"}
+    // 2: {id: "96", source: "18", target: "200"}
+    
+    console.log('connected')
+    console.log(connectedEdges)
+
+    edges.forEach((edge, index) => {
         ctx.beginPath();
-        ctx.moveTo(edge[0].x, edge[0].y)
+        ctx.moveTo(newEdges[index][0].x, newEdges[index][0].y)
         // console.log(edge[0].x, edge[0].y)
-        for (let point = 1; point < edge.length; point++) {
-            if (distance(edge[point], edge[point - 1]) > 1) {
-                ctx.lineTo(edge[point].x, edge[point].y);
+        for (let point = 1; point < newEdges[index].length; point++) {
+            if (distance(newEdges[index][point], newEdges[index][point - 1]) > 1) {
+                ctx.lineTo(newEdges[index][point].x, newEdges[index][point].y);
             }
         }
         ctx.strokeStyle = 'rgba(23,123,143,0.1)';
         ctx.stroke();
     });
+    for (let ce = 0; ce < connectedEdges.length; ce++) {
+        const connEdge = connectedEdges[ce];
+        ctx.beginPath();
+        ctx.moveTo(newEdges[connEdge.id][0].x, newEdges[connEdge.id][0].y)
+        // console.log(edge[0].x, edge[0].y)
+        for (let point = 1; point < newEdges[connEdge.id].length; point++) {
+            if (distance(newEdges[connEdge.id][point], newEdges[connEdge.id][point - 1]) > 1) {
+                ctx.lineTo(newEdges[connEdge.id][point].x, newEdges[connEdge.id][point].y);
+            }
+        }
+        ctx.lineWidth = 1.5;
+        ctx.strokeStyle = 'rgba(93,13,43,0.25)';
+        ctx.stroke();
+        ctx.lineWidth = 1;
+    }
 }
 
-function displayJson(arr) {
+function drawInitDataFlights2 (edges, nodes, n) { // e - Edge's ID, n - node's ID
+    const connectedEdge = n && edges.filter(edge => edge.source === n || edge.target === n)
+    console.log('connected' + connectedEdge)
+    edges.forEach(item => {
+        if (item.source !== n || item.target !== n) {
+            drawEdges(nodes, item, false)
+        }
+    })
+    connectedEdge && drawEdges(nodes, connectedEdge, true, n)
+
+    const selectedNode = n && nodes.find(node => node.id === n)
+
+    nodes.forEach(item => {
+        if (item.id !== n) {
+            drawNode(item, false, connectedEdge)
+        }
+    })
+    selectedNode && connectedEdge && drawNode(selectedNode, true)
+
+    //TODO if empty also reset
+}
+
+
+function displayJsonDebugOnPage(arr) {
     var outNodes = "<tr><th>ID</th><th>Name</th><th>x</th><th>y</th></tr>";
     var i;
-    console.log(arr.nodes.length)
+    // console.log(arr.nodes.length)
     for (i = 0; i < arr.nodes.length; i++) {
         outNodes += printNodesInfo(arr.nodes[i])
     }
     document.getElementById("nodessss").innerHTML = outNodes;
 };
 
-function debugg(debugg) {
+function debugToPage(debugg) {
     if (debugg) {
         document.getElementById("debugg").innerHTML = `Selected node ${debugg.title} , ID = ${debugg.id}`;
         // draw(debugg._id)
@@ -519,20 +578,30 @@ function mapParams(nodes) {
     };
 }
 
-function drawNodes(nodes, m) { // m - object with Map's bounds
-
+function changeNodesParams(nodes, m) { // m - object with Map's bounds
     nodes.forEach(item => {
         item.xOrig = item.x
         item.yOrig = item.y
         item.x = (SHIFT + 2 + (- m.xMin + item.x)) * 1.5 // / m.mapWidth * ctx.canvas.width
         item.y = (SHIFT / 5 + (- m.yMin + item.y) * 1.35) * 1.5 // / m.mapHeight * ctx.canvas.width  / m.ratio
         // item.title = item.title =
-    }
-    )
-
+    });
     return nodes;
 }
 
+function drawInitNodes(nodes) {
+    nodes.forEach(node => {
+        drawNode(node, false)
+    })
+}
+
+function drawInitEdges(edges, nodes) {
+    edges.forEach(edge => {
+        drawEdges(nodes, edge, false)
+    })
+}
+
+// draw
 function drawInitDataFlights(edges, nodes, n) { // e - Edge's ID, n - node's ID
     const connectedEdge = n && edges.filter(edge => edge.source === n || edge.target === n)
     console.log('connected' + connectedEdge)
@@ -557,7 +626,8 @@ function drawInitDataFlights(edges, nodes, n) { // e - Edge's ID, n - node's ID
 
 
 function drawEdges(nodes, edges, isSelected, n) {
-    const strokeStyle = isSelected ? 'rgba(255, 0, 0, 0.0' : 'rgba(165, 165, 165, 0.0)'
+    // const strokeStyle = isSelected ? 'rgba(255, 0, 0, 0.0' : 'rgba(165, 165, 165, 0.0)'
+    const strokeStyle = isSelected ? 'rgba(255, 0, 0, 0.1' : 'rgba(165, 165, 165, 0.1)'
     ctx.beginPath();
     let direction;
     if (isSelected) {
@@ -641,7 +711,7 @@ function drawEdges(nodes, edges, isSelected, n) {
     ctx.stroke();
 }
 
-function drawNode(node, isSelected, n) {
+function drawNode(node, isSelected) {
     const radius = isSelected ? Math.log(node.weight) * NODE_RADIUS / 2 * 1.5 : Math.log(node.weight) * NODE_RADIUS / 2
     const nodefillStyle = isSelected ? 'rgba(23, 165, 24, 1)' : 'rgba(255, 165, 0, 0.8)'
     const strokeStyle = isSelected ? 'rgba(54, 150, 54, 1)' : 'rgba(255, 150, 50,1)'
@@ -654,66 +724,6 @@ function drawNode(node, isSelected, n) {
 
 }
 
-// Line simplification based on
-// the Ramer–Douglas–Peucker algorithm
-// referance https://en.wikipedia.org/wiki/Ramer%E2%80%93Douglas%E2%80%93Peucker_algorithm
-// points: are and array of arrays consisting of [[x,y],[x,y],...,[x,y]]
-// length: is in pixels and is the square of the actual distance.
-// returns array of points of the same form as the input argument points.
-var simplifyLineRDP = function (points, length) {
-    var simplify = function (start, end) { // recursive simplifies points from start to end
-        var maxDist, index, i, xx, yy, dx, dy, ddx, ddy, p1, p2, p, t, dist, dist1;
-        p1 = points[start];
-        p2 = points[end];
-        xx = p1[0];
-        yy = p1[1];
-        ddx = p2[0] - xx;
-        ddy = p2[1] - yy;
-        dist1 = (ddx * ddx + ddy * ddy);
-        maxDist = length;
-        for (var i = start + 1; i < end; i++) {
-            p = points[i];
-            if (ddx !== 0 || ddy !== 0) {
-                // dot product
-                t = ((p[0] - xx) * ddx + (p[1] - yy) * ddy) / dist1;
-                if (t > 1) {
-                    dx = p[0] - p2[0];
-                    dy = p[1] - p2[1];
-                } else
-                    if (t > 0) {
-                        dx = p[0] - (xx + ddx * t);
-                        dy = p[1] - (yy + ddy * t);
-                    } else {
-                        dx = p[0] - xx;
-                        dy = p[1] - yy;
-                    }
-            } else {
-                dx = p[0] - xx;
-                dy = p[1] - yy;
-            }
-            dist = dx * dx + dy * dy
-            if (dist > maxDist) {
-                index = i;
-                maxDist = dist;
-            }
-        }
-
-        if (maxDist > length) { // continue simplification while maxDist > length
-            if (index - start > 1) {
-                simplify(start, index);
-            }
-            newLine.push(points[index]);
-            if (end - index > 1) {
-                simplify(index, end);
-            }
-        }
-    }
-    var end = points.length - 1;
-    var newLine = [points[0]];
-    simplify(0, end);
-    newLine.push(points[end]);
-    return newLine;
-}
 document.addEventListener('readystatechange', () => {
-    if (document.readyState == 'complete') draw();
+    if (document.readyState == 'complete') drawInit();
 });

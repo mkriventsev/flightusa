@@ -1,30 +1,32 @@
 import { maxBy, minBy, flattenDeep } from "lodash"
 import { default as dataStart } from '../data/airlines.json'
-import { default as defaultFDEB } from '../data/06.6.1.004.60.01.json'
+import { default as defaultFDEBEdges } from '../data/06.6.1.004.60.01.json'
 import { default as usaMap } from '../data/states.json'
-import { CANVAS_WIDTH, CANVAS_HEIGHT, NODE_RADIUS, SHIFT,SCALE } from "./const"
+import { CANVAS_WIDTH, CANVAS_HEIGHT, NODE_RADIUS, SHIFT, SCALE } from "./const"
 
 var canvas = document.getElementById('canvas');
 var ctx = canvas.getContext('2d');
 ctx.canvas.width = CANVAS_WIDTH
 ctx.canvas.height = CANVAS_HEIGHT
+// ctx.globalCompositeOperation='source-over';
 // ctx.globalAlpha = ALFA
 
 const data = reparseData(dataStart)
 let isInit = false;
+let initButtonWasBefore = false
 let mapScreenParams // = mapParams(data.nodes);
 let mapNodes// = changeNodesParams(data.nodes, mapScreenParams)
 
 const states = parseUSAmap(usaMap)
 
-let FDEBEdges = defaultFDEB;
+let FDEBEdges = defaultFDEBEdges;
 let FDEBparams = {
     compatibility: 0.6,
     cycles: 6,
     initStep: 0.04,
     initPart: 1,
     kBundling: 0.1,
-    iter: 50
+    iter: 60
 }
 let defaultFDEBparams = FDEBparams
 
@@ -42,11 +44,6 @@ function initialization() {
 }
 
 
-// function calculateFDEB() {
-//     FDEBEdges = FDEB(data);
-//     debugger
-//     console.log(FDEBEdges[4]);
-// }
 function loadDefaultFDEBparams() {
     document.querySelector('#compatibility').value = FDEBparams.compatibility;
     document.querySelector('#cycles').value = FDEBparams.cycles;
@@ -55,7 +52,6 @@ function loadDefaultFDEBparams() {
     document.querySelector('#kbundling').value = FDEBparams.kBundling;
     document.querySelector('#iter').value = FDEBparams.iter;
 
-    //ctx.globalCompositeOperation='multiply';
 }
 function entredNewParams() {
     if (FDEBparams.compatibility == document.querySelector('#compatibility').value)
@@ -67,16 +63,21 @@ function entredNewParams() {
                             return false
     return true;
 }
-function paramsAreDefault(){
+function paramsAreDefault() {
+    console.log('check if params are default');
     console.log(defaultFDEBparams);
     console.log(FDEBparams);
+    // debugger
     if (FDEBparams.compatibility == defaultFDEBparams.compatibility)
         if (FDEBparams.cycles == defaultFDEBparams.cycles)
-            if (FDEBparams.initStep == defaultFDEBparams.initStepvalue)
+            if (FDEBparams.initStep == defaultFDEBparams.initStep)
                 if (FDEBparams.initPart == defaultFDEBparams.initPart)
                     if (FDEBparams.kBundling == defaultFDEBparams.kBundling)
-                        if (FDEBparams.iter == defaultFDEBparams.iter)
+                        if (FDEBparams.iter == defaultFDEBparams.iter) {
+                            console.log('FDEBparams == defaultFDEBparams');
                             return true
+                        }
+    console.log('FDEBparams != defaultFDEBparams');
     return false;
 }
 function updateFDEBparams() {
@@ -191,18 +192,12 @@ function reparseData(dataStart) {
 function FDEB(data, FDEBparams) {
     const { edges, nodes } = data;
     console.log('INSIDE FUNCTION');
-    
+
     let edgeCompatibilities = [];
     edges.forEach((edge, index) => {
         edgeCompatibilities[index] = []
     });
     let edgeSubdivision = [];
-    // compatibility: 0.6,
-    // cycles: 6,
-    // initStep: 0.04,
-    // initPart: 1,
-    // kBundling: 0.1,
-    // iter: 50
 
     const edgesCompatibilitieThreshold = FDEBparams.compatibility;
     const K = FDEBparams.kBundling;
@@ -265,7 +260,7 @@ function FDEB(data, FDEBparams) {
                     y: edgeSubdivision[compEdge][p].y - edgeSubdivision[edge.id][p].y
                 };
                 if ((Math.abs(partForce.x) > deviation) || (Math.abs(partForce.y) > deviation)) {
-                    const deflectionDistance = (1 / distance(edgeSubdivision[compEdge][p], edgeSubdivision[edge.id][p]) ** 1.0)
+                    const deflectionDistance = (1 / distance(edgeSubdivision[compEdge][p], edgeSubdivision[edge.id][p]))
                     sumElectroForces.x += deflectionDistance * partForce.x;
                     sumElectroForces.y += deflectionDistance * partForce.y;
                 }
@@ -665,40 +660,57 @@ function loaderEnd() {
 
 let showinitdataButtonEl = document.querySelector('#showinitdata')
 showinitdataButtonEl.addEventListener('click', () => {
+    console.log(FDEBparams);
+    initButtonWasBefore = true
     loaderStart()
     clearCanvas()
-    let FDEBforinit = {
-        compatibility: 0.6,
-        cycles: 6,
-        initStep: 0,
-        initPart: 1,
-        kBundling: 0.1,
-        iter: 50
-    }
-    FDEB(data,FDEBforinit )
-    draw()
+    drawUSAmap(states)
+    // displayJsonDebugOnPage(data);
+    drawInitEdges(data.edges, mapNodes);
+    drawInitNodes(mapNodes);
+    // let FDEBforinit = {
+    //     empty: 1,
+    //     compatibility: 1,
+    //     cycles: 1,
+    //     initStep: '',
+    //     initPart: 1,
+    //     kBundling: 0.1,
+    //     iter: 1
+    // }
+    // FDEB(data, FDEBforinit)
+    // draw()
     loaderEnd()
 });
 
 let calculationButtonEl = document.querySelector('#calculation')
 calculationButtonEl.addEventListener('click', () => {
     loaderStart()
+    if (initButtonWasBefore)
+    {        initButtonWasBefore = false}
+    // if (entredNewParams() || initButtonWasBefore) {
     if (entredNewParams()) {
         console.log('entered new params');
         updateFDEBparams()
         console.log(Object.is(defaultFDEBparams, FDEBparams));
         clearCanvas()
-        if (!paramsAreDefault()) {
-            FDEB(data, FDEBparams)
-        } else {
+        if (paramsAreDefault()) {
             console.log('params are default');
+            FDEBEdges = defaultFDEBEdges
+            console.log(FDEBEdges[4]);
+            console.log(defaultFDEBEdges[4]);
+        } else {
+            FDEB(data, FDEBparams)
         }
         draw()
-    } else {console.log('not changed params');{
-        clearCanvas()
-        draw()}
+    } else {
+        console.log('not changed params'); {
+            clearCanvas()
+            draw()
+        }
     }
     loaderEnd()
+    calculationButtonEl.innerHTML = 'Calculate';
+    calculationButtonEl.disabled = false;
 });
 
 document.addEventListener('readystatechange', initialization());

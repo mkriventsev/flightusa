@@ -69,3 +69,28 @@
         transform: rotate(360deg);
     }
 }
+/* .btn-outline-primary{
+    width: 220px;
+    background: rgb(150, 65, 255)!important; /*2cc8df*/
+    /* border: none;
+    color: white;
+    font-weight:450;
+  }
+  
+  .btn-primary:hover{
+    background: #A4D555!important;
+    outline: none;
+    box-shadow: none!important;
+  }
+  
+  .btn-primary:focus{
+    background: rgb(26, 142, 121)!important;
+    outline: none;
+    box-shadow: none !important;
+  }
+    */
+  #calculation:active{
+    background: rgb(149, 234, 255)!important;
+    /* outline: none; */
+    /* box-shadow: none !important; */
+  }

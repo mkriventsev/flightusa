@@ -7,22 +7,95 @@
     <title>Canvas tutorial</title>
     <meta name="description" content="">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link rel="stylesheet" href="dist/style.css">
+    <link rel="stylesheet" href="dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="dist/css/style.css">
 </head>
 
 <body>
-    <div id='main'>
-        <canvas id="canvas" >
-            current stock price: $3.15 + 0.15
-        </canvas>
-        <div id="logs">
-            <div id="debugg">
-            </div>
-            <table id="nodessss">
-            </table>
+    <nav class="sticky-top navbar navbar-dark bg-dark w-100">
+        <div class="container">
+            <h4 class="text-white">
+                Visualization of airline travel in the USA
+                <small class="text-info">Kriventsev Maksym, Janoušek Ondřej</small>
+            </h4>
         </div>
-    </div>
+    </nav>
+    <div id="main">
+        <div class="container2">
+            <div id='canvasContainer'>
+                <canvas id="canvas">
+                </canvas>
+            </div>
+            <div id='info' class="bg-dark text-white">
+            <form>
+                <div class="input-group mb-3">
+                    <div class="input-group-prepend">
+                        <span class="input-group-text" id="inputGroup-sizing-default">Compatibility</span>
+                    </div>
+                    <input id="compatibility" type="number" class="form-control" aria-label="Compatibility"
+                    aria-describedby="inputGroup-sizing-default" data-decimals="2" min="0" max="1" step="0.1"/>
+                </div>
+                <div class="input-group mb-3">
+                    <div class="input-group-prepend">
+                        <span class="input-group-text" id="inputGroup-sizing-default">S</span>
+                    </div>
+                    <input id="initstep" type="number" class="form-control" aria-label="initstep"
+                        aria-describedby="inputGroup-sizing-default">
+                </div>
+                <div class="input-group mb-3">
+                    <div class="input-group-prepend">
+                        <span class="input-group-text" id="inputGroup-sizing-default">P</span>
+                    </div>
+                    <input id="initpart" type="number" class="form-control" aria-label="initpart"
+                        aria-describedby="inputGroup-sizing-default">
+                </div>
+                <div class="input-group mb-3" style="display: none;">
+                    <div class="input-group-prepend">
+                        <span class="input-group-text" id="inputGroup-sizing-default">K</span>
+                    </div>
+                    <input id="kbundling" type="number" value="0.1" class="form-control" aria-label="kbundling"
+                        aria-describedby="inputGroup-sizing-default">
+                </div>
+                <div class="input-group mb-3">
+                    <div class="input-group-prepend">
+                        <span class="input-group-text" id="inputGroup-sizing-default">C</span>
+                    </div>
+                    <input id="cycles" type="number" class="form-control" aria-label="cycles"
+                        aria-describedby="inputGroup-sizing-default"  min="0" step="1">
+                </div>
+                
+                <div class="input-group mb-3">
+                    <div class="input-group-prepend">
+                        <span class="input-group-text" id="inputGroup-sizing-default">I</span>
+                    </div>
+                    <input id="iter" type="number" class="form-control" aria-label="iter"
+                        aria-describedby="inputGroup-sizing-default" min="10" max="150" step="10">
+                </div>
+                Compatibility - total edge compatibility [0;1]
+                <br>
+                S - initial step size.
+                <br>
+                P - initial number of subdivision points P0 for each edge
+                <!-- <br>
+                K - global bundling constant controlling edge stiffness -->
+                <br>
+                С - number of cycles to execute
+                <br>
+                I - number of iterations to execute each cycle
+                <br>
+                <button id="calculation" type="button" class="btn btn-primary">Calculate</button>
+                <button id="showinitdata" type="button" class="btn btn-primary">Show Init Data</button>
+            </form>
 
+                <div id='airport'>
+
+                </div>
+            </div>
+        </div>
+        <div class="loader_wrapper">
+        <div class="loader"></div>
+    </div>
+    <script type="text/javascript" src="dist/bootstrap.min.js"></script>
     <script type="text/javascript" src="dist/main.js"></script>
 </body>
 

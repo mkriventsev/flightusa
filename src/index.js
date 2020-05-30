@@ -178,7 +178,6 @@ function reparseData(dataStart) {
         nodes[edge.source].weight++
         nodes[edge.target].weight++
     });
-
     return {
         nodes,
         edges,
@@ -239,6 +238,7 @@ function FDEB(data, FDEBparams) {
         P *= P_increase;
         I *= I_decrease;
         edgeSubDivisions(P)
+        // debugger
     }
     FDEBEdges = edgeSubdivision;
     return;
@@ -444,7 +444,7 @@ function clearCanvas() {
 function clickOnCanvas(e) {
     console.log('position');
     const pos = {
-        x: e.clientX,
+        x: e.clientX - e.target.offsetLeft,
         y: e.clientY - e.target.offsetTop
     }
     if (data.nodes.length > 0 && FDEBEdges) {
@@ -535,16 +535,15 @@ function printNodesInfo(node) {
 };
 
 function mapParams(nodes) {
-    var xMax = maxBy(nodes, (item) => item.x).x;
-    var yMax = maxBy(nodes, (item) => item.y).y;
-    var xMin = minBy(nodes, (item) => item.x).x;
-    var yMin = minBy(nodes, (item) => item.y).y;
-    console.log(xMax, 'max x', yMax, 'max y \n', xMin, 'min x', yMin, 'min y');
+    let xMax = maxBy(nodes, (item) => item.x).x;
+    let yMax = maxBy(nodes, (item) => item.y).y;
+    let xMin = minBy(nodes, (item) => item.x).x;
+    let yMin = minBy(nodes, (item) => item.y).y;
 
-    var mapHeight = yMax - yMin;
-    var mapWidth = xMax - xMin;
-    const ratio = mapWidth / mapHeight
-    console.log('ratio ' + ratio)
+    let mapHeight = yMax - yMin;
+    let mapWidth = xMax - xMin;
+    let ratio = mapWidth / mapHeight
+
     return {
         xMax: xMax,
         yMax: yMax,
@@ -558,10 +557,10 @@ function mapParams(nodes) {
 
 function changeNodesParams(nodes, m) { // m - object with Map's bounds
     nodes.forEach(item => {
-        item.xOrig = item.x
-        item.yOrig = item.y
-        item.x = SHIFT + (- m.xMin + item.x) * SCALE
-        item.y = SHIFT + (- m.yMin + item.y) * 1.35 * SCALE
+        item.xOrig = item.x;
+        item.yOrig = item.y;
+        item.x = SHIFT + (- m.xMin + item.x) * SCALE;
+        item.y = SHIFT + (- m.yMin + item.y) * 1.35 * SCALE;
     });
     return nodes;
 }
@@ -639,14 +638,13 @@ function drawEdges(nodes, edges, isSelected, n) {
 }
 
 function drawNode(node, isSelected) {
-    const radius = isSelected ? Math.log(node.weight) * NODE_RADIUS / 2 * 1.5 : Math.log(node.weight) * NODE_RADIUS / 2
-    const nodefillStyle = isSelected ? 'rgba(23, 165, 24, 1)' : 'rgba(255, 165, 0,1.0)'
-    const strokeStyle = isSelected ? 'rgba(54, 150, 54, 1)' : 'rgba(255, 150, 50, 0.8)'
+    const radius = Math.log(node.weight) * NODE_RADIUS / 2;
+    // const radius = 5
     ctx.beginPath();
     ctx.arc(node.x, node.y, radius, 0, Math.PI * 2, true);
-    ctx.fillStyle = nodefillStyle;
+    ctx.fillStyle = 'rgba(255, 165, 0, 1.0)';
     ctx.fill();
-    ctx.strokeStyle = strokeStyle;
+    ctx.strokeStyle = 'rgba(255, 150, 50, 1.0)';
     ctx.stroke();
 }
 
@@ -687,6 +685,7 @@ calculationButtonEl.addEventListener('click', () => {
     loaderStart()
     if (initButtonWasBefore)
     {        initButtonWasBefore = false}
+
     // if (entredNewParams() || initButtonWasBefore) {
     if (entredNewParams()) {
         console.log('entered new params');
